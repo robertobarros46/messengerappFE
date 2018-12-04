@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<NotFound /> should render Not found component 1`] = `
+<div
+  className="page-not-found"
+>
+  <h1
+    className="title"
+  >
+    404
+  </h1>
+  <div
+    className="desc"
+  >
+    A página que você esta procurando não existe.
+  </div>
+  <a
+    href="/"
+    onClick={[Function]}
+  >
+    <button
+      className="ant-btn go-back-btn ant-btn-primary ant-btn-lg"
+      onClick={[Function]}
+      type="button"
+    >
+      <span>
+        Go Back
+      </span>
+    </button>
+  </a>
+</div>
+`;

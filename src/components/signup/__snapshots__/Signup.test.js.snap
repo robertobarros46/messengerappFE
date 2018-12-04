@@ -1,0 +1,124 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Signup /> +++ render LoginPage correctly, snapshot 1`] = `
+<div
+  className="signup-container"
+>
+  <h1
+    className="page-title"
+  >
+    Sign Up
+  </h1>
+  <div
+    className="signup-content"
+  >
+    <Form
+      className="signup-form"
+      hideRequiredMark={false}
+      layout="horizontal"
+      onSubmit={[Function]}
+      prefixCls="ant-form"
+    >
+      <FormItem
+        colon={true}
+        hasFeedback={false}
+        label="Nome"
+        prefixCls="ant-form"
+      >
+        <Input
+          autoComplete="off"
+          disabled={false}
+          name="nome"
+          onChange={[Function]}
+          placeholder="Seu primeiro nome"
+          prefixCls="ant-input"
+          size="large"
+          type="text"
+          value=""
+        />
+      </FormItem>
+      <FormItem
+        colon={true}
+        hasFeedback={false}
+        label="Sobrenome"
+        prefixCls="ant-form"
+      >
+        <Input
+          autoComplete="off"
+          disabled={false}
+          name="sobrenome"
+          onChange={[Function]}
+          placeholder="Seu segundo nome"
+          prefixCls="ant-input"
+          size="large"
+          type="text"
+          value=""
+        />
+      </FormItem>
+      <FormItem
+        colon={true}
+        hasFeedback={true}
+        label="Email"
+        prefixCls="ant-form"
+      >
+        <Input
+          autoComplete="off"
+          disabled={false}
+          name="email"
+          onBlur={[Function]}
+          onChange={[Function]}
+          placeholder="Seu email"
+          prefixCls="ant-input"
+          size="large"
+          type="email"
+          value=""
+        />
+      </FormItem>
+      <FormItem
+        colon={true}
+        hasFeedback={false}
+        label="Senha"
+        prefixCls="ant-form"
+      >
+        <Input
+          autoComplete="off"
+          disabled={false}
+          name="password"
+          onChange={[Function]}
+          placeholder="Um senha entre 6 e 20 caractéres"
+          prefixCls="ant-input"
+          size="large"
+          type="password"
+          value=""
+        />
+      </FormItem>
+      <FormItem
+        colon={true}
+        hasFeedback={false}
+        prefixCls="ant-form"
+      >
+        <Button
+          block={false}
+          className="signup-form-button"
+          disabled={true}
+          ghost={false}
+          htmlType="submit"
+          loading={false}
+          prefixCls="ant-btn"
+          size="large"
+          type="primary"
+        >
+          Sign up
+        </Button>
+        Já é membro? 
+        <Link
+          replace={false}
+          to="/login"
+        >
+          Faça login!
+        </Link>
+      </FormItem>
+    </Form>
+  </div>
+</div>
+`;

@@ -1,0 +1,36 @@
+.chat-container{
+    max-width: 420px;
+    margin: 0 auto;
+    margin: 0 auto;
+    margin-top: 40px;
+}
+
+.message-textfield{
+    display: inline-block;
+    width: 866px !important;
+    border-color: dodgerblue !important
+}
+
+
+.send-button{
+    display: inline-block;
+    height: 55px !important;
+    width: 60px;
+    margin: 16px 20px !important;
+    border-radius: 40% !important;
+    background-color: dodgerblue !important;
+    position: absolute;
+}
+
+.send-button:disabled{
+    background-color: darkgrey !important;
+}
+
+.messenger-appbar{
+    background-color: dodgerblue !important;
+}
+
+.message-container{
+  height: 500px;
+  overflow-y: scroll;
+}

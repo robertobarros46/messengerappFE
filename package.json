@@ -3,23 +3,57 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^3.5.1",
+    "@material-ui/icons": "^3.0.1",
+    "antd": "^3.10.8",
+    "axios": "^0.18.0",
+    "babel": "^6.23.0",
+    "babel-plugin-import": "^1.11.0",
+    "enzyme": "^3.7.0",
+    "enzyme-adapter-react-16": "^1.7.0",
+    "enzyme-to-json": "^3.3.4",
+    "fetch-mock": "^7.2.5",
+    "jasmine": "^3.3.0",
+    "jasmine-enzyme": "^7.0.1",
+    "jsdom": "^13.0.0",
+    "material-ui": "^0.20.2",
+    "moxios": "^0.4.0",
     "react": "^16.6.3",
+    "react-app-rewire-less": "^2.1.3",
+    "react-app-rewired": "^1.6.2",
     "react-dom": "^16.6.3",
-    "react-scripts": "2.1.1"
+    "react-redux": "^5.1.1",
+    "react-router-dom": "^4.3.1",
+    "react-scripts": "2.1.1",
+    "react-stomp": "^4.0.0",
+    "react-talk": "^1.0.0",
+    "redux": "^4.0.1",
+    "redux-mock-store": "^1.5.3",
+    "redux-persist": "^5.10.0",
+    "redux-thunk": "^2.3.0",
+    "sinon": "^7.1.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "eject": "react-scripts eject",
+    "test": "jest --verbose",
+    "test:watch": "jest"
   },
   "browserslist": [
     ">0.2%",
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "proxy": "http://127.0.0.1:8080",
+  "devDependencies": {
+    "babel-jest": "*",
+    "babel-preset-env": "*",
+    "babel-preset-react": "*",
+    "enzyme": "*",
+    "enzyme-adapter-react-16": "*",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "*"
+  }
 }

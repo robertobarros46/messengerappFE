@@ -42,6 +42,23 @@ export class AppHeader extends Component {
               handleMenuClick={this.handleMenuClick} />
           </Menu.Item>
         ];
+      }else if(this.props.currentUser.authorities[0].authority === "ROLE_AUDITOR"){
+        menuItems = [
+          <Menu.Item key="/">
+            <Link title="Página principal" to="/">
+              <Icon type="home" className="nav-icon" />
+            </Link>
+          </Menu.Item>,
+          <Menu.Item key="/rooms">
+            <Link title="Listar salas" to="/rooms">
+              <Icon type="table" className="nav-icon" />
+            </Link>
+          </Menu.Item>,
+          <Menu.Item key="/profile" className="profile-menu">
+            <ProfileDropdownMenu
+              handleMenuClick={this.handleMenuClick} />
+          </Menu.Item>
+        ];
       } else {
         menuItems = [
           <Menu.Item key="/">
@@ -68,7 +85,7 @@ export class AppHeader extends Component {
 
     return (
       <Header className="app-header">
-        <div className="container">
+        <div className="header-container">
           <div className="app-title" >
             <Link to="/">Messenger App</Link>
           </div>

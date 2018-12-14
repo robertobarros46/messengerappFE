@@ -62,9 +62,7 @@ export const doLogout = (email) => {
             method: 'get',
             url: '/logout',
         }).then(response => {
-            localStorage.removeItem("CurrentUser");
-            localStorage.removeItem("ROLE");
-            localStorage.removeItem("NAME");
+            localStorage.clear();
             notification.success({
                 message: 'Messenger App',
                 description: "Logout realizado com sucesso!",

@@ -82,8 +82,8 @@ describe('<Home />', () => {
                 }
             }
         });
-        expect(wrapper.find("Button")).toHaveLength(1);
-        expect(wrapper.find("Drawer")).toHaveLength(1);
+        expect(wrapper.find("Button")).toHaveLength(4);
+        expect(wrapper.find("Drawer")).toHaveLength(2);
         expect(wrapper.find("Table")).toHaveLength(2);
     });
 });

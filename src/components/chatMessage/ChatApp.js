@@ -43,7 +43,7 @@ export class Chat extends Component {
   createMessage(message){
     return {
       key: Math.random(),
-      fromName: this.props.authReducerState.currentUser.name,
+      fromName: this.props.authReducerState.currentUser.email,
       fromUserId: this.props.authReducerState.currentUser.id,
       content: message,
       chatId: this.props.chatReducerState.currentChat

@@ -82,6 +82,14 @@ const userReducer = (state = initState, action) => {
                     error: action.error.response.data
                 }
             }
+        case 'LOGOUT':
+            return {
+                state: undefined
+            }
+        case 'LOGOUT_ERROR':
+            return {
+                ...state
+            }
         default:
             return state;
     }

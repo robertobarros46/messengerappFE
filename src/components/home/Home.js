@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Table, notification, Drawer, Form, Col, Row, Input, Select } from 'antd';
+import { Button, Table, notification, Drawer, Form, Col, Row, Input, Select, Modal } from 'antd';
 import { connect } from 'react-redux';
 import { getUsers } from '../../store/actions/userActions';
-import { getChats, setCurrentChat, createChat } from '../../store/actions/chatActions';
+import { getChats, setCurrentChat, createChat, deleteChat, getUsersByChat, setRoomUsers } from '../../store/actions/chatActions';
 import SockJsClient from 'react-stomp';
 import './Home.css';
 
@@ -13,6 +13,7 @@ export class Home extends Component {
         this.state = {
             visibleChatDrawer: false,
             visibleRoomDrawer: false,
+            visibleEditModel: false,
             messageGot: false,
             chatName: {
                 value: ''
@@ -21,6 +22,7 @@ export class Home extends Component {
         };
         this.showChatDrawer = this.showChatDrawer.bind(this);
         this.showRoomDrawer = this.showRoomDrawer.bind(this);
+        this.showEditModal = this.showEditModal.bind(this);
         this.onChange = this.onChange.bind(this);
         this.onClose = this.onClose.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -42,6 +44,15 @@ export class Home extends Component {
         });
     };
 
+    showEditModal(chatId, chatName) {
+        this.props.setCurrentChat(chatName);
+        this.props.getUsersByChat(chatId, this.props.reducerState.auth.currentUser.email);
+        this.setState({
+            visibleEditModel: true,
+        });
+
+    };
+
     onChange(page, pageSize) {
         this.props.getUsers(page - 1, pageSize);
     }
@@ -50,7 +61,7 @@ export class Home extends Component {
         this.setState({
             visibleRoomDrawer: false,
             visibleChatDrawer: false,
-
+            visibleEditModel: false
         });
     };
 
@@ -92,11 +103,13 @@ export class Home extends Component {
         return [
             {
                 chatName: email,
-                userId: this.props.reducerState.auth.currentUser.id
+                userId: this.props.reducerState.auth.currentUser.id,
+                chatType: "CHAT"
             },
             {
                 chatName: this.props.reducerState.auth.currentUser.email,
-                userId: id
+                userId: id,
+                chatType: "CHAT"
             }
         ]
     }
@@ -129,6 +142,10 @@ export class Home extends Component {
         console.log('Notification was closed. Either the close button was clicked or duration time elapsed.');
     };
 
+    deleteChatOrRoom(chatId, email) {
+        this.props.deleteChat(chatId);
+    }
+
     handleInputChange(event) {
         const target = event.target;
         const inputValue = target.value;
@@ -147,12 +164,21 @@ export class Home extends Component {
     }
 
     createRoom() {
-        let roomRequest = this.createRoomRequest();
-        console.log(roomRequest);
-        this.props.createChat(roomRequest);
-        this.setState({
-            visible: false
-        })
+        if (this.state.roomUsers.length < 2) {
+            notification.error({
+                message: "Erro",
+                description: "Para criar uma sala, deve-se conter um número maior ou igual a dois usuários",
+                duration: 0,
+                onClose: this.close(),
+            });
+        } else {
+            let roomRequest = this.createRoomRequest();
+            this.props.createChat(roomRequest);
+            this.setState({
+                visibleRoomDrawer: false,
+                roomUsers: []
+            })
+        }
     }
 
     createRoomRequest() {
@@ -160,12 +186,14 @@ export class Home extends Component {
         for (let i = 0; i < this.state.roomUsers.length; i++) {
             roomRequest.push({
                 chatName: this.state.chatName.value,
-                userId: this.state.roomUsers[i]
+                userId: this.state.roomUsers[i],
+                chatType: "ROOM"
             })
         }
         return [...roomRequest, {
             chatName: this.state.chatName.value,
-            userId: this.props.reducerState.auth.currentUser.id
+            userId: this.props.reducerState.auth.currentUser.id,
+            chatType: "ROOM"
         }];
     }
 
@@ -202,7 +230,7 @@ export class Home extends Component {
         }, {
             title: '',
             dataIndex: '',
-            key: 'delete',
+            key: 'add',
             render: (record) => {
                 return (
                     <Button type="primary" icon="plus" onClick={() => this.addChat(record.key, record.email)}></Button>
@@ -214,10 +242,11 @@ export class Home extends Component {
         const chats = this.props.reducerState.chat.chats;
         for (let i = 0; i < chats.length; i++) {
             chatsData.push({
-                key: Math.random(),
-                id: chats[i].userId,
+                key: chats[i].chatId,
+                userId: chats[i].userId,
                 email: chats[i].chatName,
-                chatId: chats[i].chatId
+                chatId: chats[i].chatId,
+                chatType: chats[i].chatType
             })
         }
 
@@ -240,7 +269,7 @@ export class Home extends Component {
             key: 'deletar',
             render: (record) => {
                 return (
-                    <Button type="danger" onClick={() => this.chat(record.chatId, record.email)} shape="circle" icon="delete" />
+                    <Button type="danger" onClick={() => this.deleteChatOrRoom(record.chatId, record.email)} shape="circle" icon="delete" />
                 )
             }
         }, {
@@ -248,9 +277,15 @@ export class Home extends Component {
             dataIndex: '',
             key: 'editar',
             render: (record) => {
-                return (
-                    <Button onClick={() => this.chat(record.chatId, record.email)} shape="circle" icon="edit" />
-                )
+                if (record.chatType === "CHAT") {
+                    return (
+                        <Button onClick={() => this.showEditModal(record.chatId, record.email)} shape="circle" icon="edit" disabled />
+                    )
+                } else {
+                    return (
+                        <Button onClick={() => this.showEditModal(record.chatId, record.email)} shape="circle" icon="edit" />
+                    )
+                }
             }
         }
         ];
@@ -289,26 +324,24 @@ export class Home extends Component {
                             <Form layout="vertical" hideRequiredMark>
                                 <Row gutter={16}>
                                     <Col span={24}>
-                                        <Form.Item label="Nome Chat">
-                                            {<Input placeholder="Nome do chat"
+                                        <Form.Item label="Nome da sala">
+                                            <Input placeholder="Nome do chat"
                                                 onChange={(event) => this.handleInputChange(event)}
-                                            />}
+                                            />
                                         </Form.Item>
                                     </Col>
                                 </Row>
                                 <Row gutter={16}>
                                     <Col span={24}>
                                         <Form.Item label="Adicione pessoas à sala">
-                                            {
-                                                <Select
-                                                    mode="multiple"
-                                                    style={{ width: '100%' }}
-                                                    placeholder="Selecione por favor"
-                                                    onChange={this.handleChange}
-                                                >
-                                                    {children}
-                                                </Select>
-                                            }
+                                            <Select
+                                                mode="multiple"
+                                                style={{ width: '100%' }}
+                                                placeholder="Selecione por favor"
+                                                onChange={this.handleChange}
+                                            >
+                                                {children}
+                                            </Select>
                                         </Form.Item>
                                     </Col>
                                 </Row>
@@ -333,6 +366,39 @@ export class Home extends Component {
                                 </Button>
                             </div>
                         </Drawer>
+                        <Modal
+                            title="Edição de sala"
+                            visible={this.state.visibleEditModel}
+                            onOk={this.handleOk}
+                            onCancel={this.onClose}
+                        >
+                            <Form layout="vertical" hideRequiredMark>
+                                <Row gutter={16}>
+                                    <Col span={24}>
+                                        <Form.Item label="Nome da sala">
+                                            <Input placeholder="Nome do chat" value={this.props.reducerState.chat.currentChat}
+                                                onChange={(event) => this.handleInputChange(event)}
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+                                <Row gutter={16}>
+                                    <Col span={24}>
+                                        <Form.Item label="Adicione pessoas à sala">
+                                            <Select
+                                                mode="multiple"
+                                                style={{ width: '100%' }}
+                                                placeholder="Selecione por favor"
+                                                value={this.props.reducerState.chat.roomUsersEmail}
+                                                onChange={this.handleChange}
+                                            >
+                                                {children}
+                                            </Select>
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+                            </Form>
+                        </Modal>
                     </div>
                     <div>
                         <Table dataSource={chatsData} columns={columns} pagination={{ pageSize: 10 }} />
@@ -366,7 +432,10 @@ const mapDispatchToProps = (dispatch) => {
         getChats: (userId) => dispatch(getChats(userId)),
         getUsers: (page, size) => dispatch(getUsers(page, size)),
         setCurrentChat: (chatId, email) => dispatch(setCurrentChat(chatId, email)),
-        createChat: (createChatRequest) => dispatch(createChat(createChatRequest))
+        createChat: (createChatRequest) => dispatch(createChat(createChatRequest)),
+        deleteChat: (chatId) => dispatch(deleteChat(chatId)),
+        getUsersByChat: (chatId, email) => dispatch(getUsersByChat(chatId, email)),
+        setRoomUsers: () => dispatch(setCurrentChat())
     }
 }
 

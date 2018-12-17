@@ -3,6 +3,7 @@ const initState = {
     currentChatName: '',
     chats: [],
     messages: [],
+    roomUsersEmail: [],
     currentMessages: [],
     error: null
 }
@@ -27,6 +28,21 @@ const chatReducer = (state = initState, action) => {
             return {
                 ...state
             }
+        case 'GET_USERs_BY_CHAT':
+            return {
+                ...state,
+                roomUsersEmail: action.response.data,
+            }
+        case 'GET_USERs_BY_CHAT_ERROR':
+            return {
+                ...state,
+                error: action.error.response
+            }
+        case 'ROOM_USERS':
+            return {
+                ...state,
+                roomUsersEmail: []
+            }
         // case 'GET_CURRENT_MESSAGEs':
         //     return {
         //         ...state,
@@ -36,6 +52,16 @@ const chatReducer = (state = initState, action) => {
         //     return {
         //         ...state
         //     }
+        case 'DELETE_CHAT':
+            return {
+                ...state,
+                chats: state.chats.filter((row) => row.id !== action.actions.id)
+            }
+        case 'DELETE_CHAT_ERROR':
+            return {
+                ...state,
+                error: action.error.response
+            }
         case 'CREATE_CHAT':
             return {
                 ...state,

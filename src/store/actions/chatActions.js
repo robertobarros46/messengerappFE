@@ -1,4 +1,5 @@
-import axios from '../../utils/axios/axios'
+import axios from '../../utils/axios/axios';
+import {notification} from 'antd';
 
 export const getChats = (userId) => {
     return dispatch => {
@@ -24,6 +25,25 @@ export const getMessages = (chatId) => {
         }).catch(error => {
             dispatch({ type: 'GET_MESSAGEs_ERROR', error });
         });;
+    }
+}
+
+export const getUsersByChat = (chatId, email) => {
+    return dispatch => {
+        axios({
+            method: 'get',
+            url: '/api/v1/chats/' + chatId + '/' + email +'/users'
+        }).then(response => {
+            dispatch({ type: 'GET_USERs_BY_CHAT', response });
+        }).catch(error => {
+            dispatch({ type: 'GET_USERs_BY_CHAT_ERROR', error });
+        });;
+    }
+}
+
+export const setRoomUsers = () => {
+    return dispatch => {
+        dispatch({ type: 'ROOM_USERS' });
     }
 }
 
@@ -68,6 +88,19 @@ export const createChat = (createChatRequest) => {
         }).catch(error => {
             dispatch({ type: 'CREATE_CHAT_ERROR', error });
         });;
+    }
+}
+
+export const deleteChat = (chatId) => {
+    return dispatch => {
+        axios({
+            method: 'delete',
+            url: '/api/v1/chats/' + chatId,
+        }).then(response => {
+            dispatch({ type: 'DELETE_CHAT', actions: { chatId, response } });
+        }).catch(error => {
+            dispatch({ type: 'DELETE_CHAT_ERROR', error });
+        });
     }
 }
 

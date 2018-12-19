@@ -1,5 +1,4 @@
 import axios from '../../utils/axios/axios';
-import {notification} from 'antd';
 
 export const getChats = (userId) => {
     return dispatch => {
@@ -76,7 +75,7 @@ function createMessages(response) {
     return data;
 }
 
-export const createChat = (createChatRequest) => {
+export const createChat = (createChatRequest, email) => {
     return dispatch => {
         axios({
             method: 'put',
@@ -84,9 +83,24 @@ export const createChat = (createChatRequest) => {
             data: JSON.stringify(createChatRequest),
             config: { headers: { 'Content-Type': 'application/json' } }
         }).then(response => {
-            dispatch({ type: 'CREATE_CHAT', response });
+            dispatch({ type: 'CREATE_CHAT', actions:{response, createChatRequest, email}});
         }).catch(error => {
             dispatch({ type: 'CREATE_CHAT_ERROR', error });
+        });;
+    }
+}
+
+export const editChat = (editChatRequest, email, chatId) => {
+    return dispatch => {
+        axios({
+            method: 'put',
+            url: '/api/v1/chats/' + chatId,
+            data: JSON.stringify(editChatRequest),
+            config: { headers: { 'Content-Type': 'application/json' } }
+        }).then(response => {
+            dispatch({ type: 'EDIT_CHAT', actions:{response, email, chatId}});
+        }).catch(error => {
+            dispatch({ type: 'EDIT_CHAT_ERROR', error });
         });;
     }
 }

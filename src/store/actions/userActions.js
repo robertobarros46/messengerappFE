@@ -25,11 +25,11 @@ export const createUser = (user) => {
     }
 }
 
-export const getUsers = (page, size) => {
+export const getUsers = (name, lastName, page, size) => {
     return dispatch => {
         axios({
             method: 'get',
-            url: "/api/v1/users?page=" + page + "&size=" + size,
+            url: "/api/v1/users?name="+name+"&lastName="+lastName+"&page=" + page + "&size=" + size,
         }).then(response => {
             dispatch({ type: 'GET_USERs', response });
         }).catch(error => {

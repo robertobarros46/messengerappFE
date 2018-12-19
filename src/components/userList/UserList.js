@@ -1,19 +1,32 @@
 import React, { Component } from 'react';
-import { Table, Button } from 'antd';
+import { Table, Button, Input, Icon, Form } from 'antd';
 import { getUsers, deleteOneUser } from '../../store/actions/userActions'
 import { connect } from 'react-redux';
+import './UserList.css';
+
+const FormItem = Form.Item;
+
 
 
 export class UserList extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            name: {
+                value: ''
+            },
+            lastName: {
+                value: ''
+            }
+        }
         this.loadAllUsers = this.loadAllUsers.bind(this);
         this.onChange = this.onChange.bind(this);
         this.remove = this.remove.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
-    loadAllUsers(page, size) {
-        this.props.getUsers(page, size);
+    loadAllUsers(name, lastName, page, size) {
+        this.props.getUsers(name, lastName, page, size);
     }
 
     remove(id, email) {
@@ -21,19 +34,39 @@ export class UserList extends Component {
     }
 
     onChange(page, pageSize) {
-        this.props.getUsers(page-1, pageSize);
+        this.props.getUsers(this.state.name.value, this.state.lastName.value, page - 1, pageSize);
     }
 
     componentWillMount() {
         let page = 0;
-        let size = 10;
-        this.loadAllUsers(page, size);
+        let size = 8;
+        this.loadAllUsers("", "", page, size);
+    }
+
+    handleInputChange(event) {
+        const target = event.target;
+        const inputName = target.name;        
+        const inputValue = target.value;
+
+        this.setState({
+            [inputName] : {
+                value: inputValue
+            }
+        });
+    }
+
+    handleSubmit = (e) => {
+        let page = 0;
+        let size = 8;
+        e.preventDefault();
+        console.log(this.state);
+        this.loadAllUsers(this.state.name.value, this.state.lastName.value, page, size);
     }
 
     render() {
         const data = [];
         let users = [];
-        if(this.props.reducerState.users){
+        if (this.props.reducerState.users) {
             users = this.props.reducerState.users;
         }
 
@@ -81,6 +114,22 @@ export class UserList extends Component {
 
         return (
             <div>
+                <Form layout="inline" onSubmit={this.handleSubmit} className="login-form">
+                    <FormItem>
+                        <Input name="name" prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Nome" onChange={(event) => this.handleInputChange(event)} />
+                    </FormItem>
+                    <FormItem>
+                        <Input name="lastName" prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Sobrenome" onChange={(event) => this.handleInputChange(event)} />
+                    </FormItem>
+                    <FormItem>
+                        <Button  icon="search" type="primary" htmlType="submit" className="login-form-button">
+                            Procurar
+                        </Button>
+                    </FormItem>
+                </Form>
+
+
+
                 <Table dataSource={data} columns={columns} pagination={
                     {
                         pageSize: this.props.reducerState.size,
@@ -101,7 +150,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        getUsers: (page, size) => dispatch(getUsers(page, size)),
+        getUsers: (name, lastName, page, size) => dispatch(getUsers(name, lastName, page, size)),
         deleteUser: (email, id) => dispatch(deleteOneUser(email, id))
     }
 }

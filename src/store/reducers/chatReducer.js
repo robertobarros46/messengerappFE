@@ -4,6 +4,7 @@ const initState = {
     chats: [],
     messages: [],
     roomUsersEmail: [],
+    roomUsersId: [],
     currentMessages: [],
     error: null
 }
@@ -31,7 +32,8 @@ const chatReducer = (state = initState, action) => {
         case 'GET_USERs_BY_CHAT':
             return {
                 ...state,
-                roomUsersEmail: action.response.data,
+                roomUsersId: action.response.data.map(user => user.id),
+                roomUsersEmail: action.response.data.map(user => user.email)
             }
         case 'GET_USERs_BY_CHAT_ERROR':
             return {
@@ -41,7 +43,7 @@ const chatReducer = (state = initState, action) => {
         case 'ROOM_USERS':
             return {
                 ...state,
-                roomUsersEmail: []
+                roomUsers: []
             }
         // case 'GET_CURRENT_MESSAGEs':
         //     return {
@@ -53,9 +55,10 @@ const chatReducer = (state = initState, action) => {
         //         ...state
         //     }
         case 'DELETE_CHAT':
+
             return {
                 ...state,
-                chats: state.chats.filter((row) => row.id !== action.actions.id)
+                chats: state.chats.filter((row) => row.chatId !== action.actions.chatId)
             }
         case 'DELETE_CHAT_ERROR':
             return {
@@ -65,8 +68,30 @@ const chatReducer = (state = initState, action) => {
         case 'CREATE_CHAT':
             return {
                 ...state,
+                chats: [...state.chats, {
+                    row: '',
+                    chatId: action.actions.response.data[0].chatId,
+                    chatName: action.actions.email,
+                    userId: action.actions.createChatRequest.userId,
+                    chatType: action.actions.createChatRequest.chatType,
+                    timestamp: ''
+                }]
             }
         case 'CREATE_CHAT_ERROR':
+            return {
+                ...state,
+                error: action.error.response
+            }
+        case 'EDIT_CHAT':
+            state.chats.forEach(function (chat) {
+                if (action.actions.chatId === chat.chatId) {
+                    chat.chatName = action.actions.email
+                }
+            });
+            return {
+                ...state
+            }
+        case 'EDIT_CHAT_ERROR':
             return {
                 ...state,
                 error: action.error.response

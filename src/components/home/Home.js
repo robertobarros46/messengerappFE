@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button, Table, notification, Drawer, Form, Col, Row, Input, Select, Modal } from 'antd';
 import { connect } from 'react-redux';
 import { getUsers } from '../../store/actions/userActions';
-import { getChats, setCurrentChat, createChat, deleteChat, getUsersByChat, setRoomUsers } from '../../store/actions/chatActions';
+import { getChats, setCurrentChat, createChat, deleteChat, getUsersByChat, setRoomUsers, editChat } from '../../store/actions/chatActions';
 import SockJsClient from 'react-stomp';
 import './Home.css';
 
@@ -13,7 +13,7 @@ export class Home extends Component {
         this.state = {
             visibleChatDrawer: false,
             visibleRoomDrawer: false,
-            visibleEditModel: false,
+            visibleEditModal: false,
             messageGot: false,
             chatName: {
                 value: ''
@@ -25,7 +25,8 @@ export class Home extends Component {
         this.showEditModal = this.showEditModal.bind(this);
         this.onChange = this.onChange.bind(this);
         this.onClose = this.onClose.bind(this);
-        this.handleChange = this.handleChange.bind(this);
+        this.handleSelectChange = this.handleSelectChange.bind(this);
+        this.handleEdit = this.handleEdit.bind(this);
         this.createRoom = this.createRoom.bind(this);
     }
 
@@ -39,16 +40,23 @@ export class Home extends Component {
     };
 
     showRoomDrawer() {
+        let page = 0;
+        let size = 1000;
+        this.props.getUsers(page, size);
         this.setState({
             visibleRoomDrawer: true,
         });
     };
 
     showEditModal(chatId, chatName) {
-        this.props.setCurrentChat(chatName);
+        let page = 0;
+        let size = 1000;
+        this.props.getUsers(page, size);
+        this.props.setCurrentChat(chatId, chatName);
         this.props.getUsersByChat(chatId, this.props.reducerState.auth.currentUser.email);
         this.setState({
-            visibleEditModel: true,
+            visibleEditModal: true,
+            roomUsers: this.props.reducerState.chat.roomUsersId
         });
 
     };
@@ -61,7 +69,7 @@ export class Home extends Component {
         this.setState({
             visibleRoomDrawer: false,
             visibleChatDrawer: false,
-            visibleEditModel: false
+            visibleEditModal: false
         });
     };
 
@@ -93,10 +101,10 @@ export class Home extends Component {
 
     addChat(id, email) {
         let chatRequest = this.createChatRequest(id, email);
-        this.props.createChat(chatRequest);
+        this.props.createChat(chatRequest, email);
         this.setState({
-            visible: false
-        })
+            visibleChatDrawer: false
+        });
     }
 
     createChatRequest(id, email) {
@@ -133,13 +141,8 @@ export class Home extends Component {
             description: message.content.slice(0, 20) + '...',
             btn,
             key,
-            duration: 0,
-            onClose: this.close(),
+            duration: 0
         });
-    };
-
-    close() {
-        console.log('Notification was closed. Either the close button was clicked or duration time elapsed.');
     };
 
     deleteChatOrRoom(chatId, email) {
@@ -157,7 +160,7 @@ export class Home extends Component {
         });
     }
 
-    handleChange(value) {
+    handleSelectChange(value) {
         this.setState({
             roomUsers: value
         });
@@ -168,12 +171,11 @@ export class Home extends Component {
             notification.error({
                 message: "Erro",
                 description: "Para criar uma sala, deve-se conter um número maior ou igual a dois usuários",
-                duration: 0,
-                onClose: this.close(),
+                duration: 0
             });
         } else {
-            let roomRequest = this.createRoomRequest();
-            this.props.createChat(roomRequest);
+            let roomRequest = this.createRoomRequest(this.state.chatName.value);
+            this.props.createChat(roomRequest, this.state.chatName.value);
             this.setState({
                 visibleRoomDrawer: false,
                 roomUsers: []
@@ -181,25 +183,48 @@ export class Home extends Component {
         }
     }
 
-    createRoomRequest() {
+    createRoomRequest(chatName) {
         let roomRequest = [];
         for (let i = 0; i < this.state.roomUsers.length; i++) {
             roomRequest.push({
-                chatName: this.state.chatName.value,
+                chatName: chatName,
                 userId: this.state.roomUsers[i],
                 chatType: "ROOM"
             })
         }
         return [...roomRequest, {
-            chatName: this.state.chatName.value,
+            chatName: chatName,
             userId: this.props.reducerState.auth.currentUser.id,
             chatType: "ROOM"
         }];
     }
 
+    handleEdit() {
+        if (this.state.roomUsers.length < 2) {
+            notification.error({
+                message: "Erro",
+                description: "Para criar uma sala, deve-se conter um número maior que dois usuários",
+                duration: 0
+            });
+        } else {
+            if (this.state.chatName.value === "") {
+                let editRequest = this.createRoomRequest(this.props.reducerState.chat.currentChatName);
+                this.props.editChat(editRequest, this.props.reducerState.chat.currentChatName, this.props.reducerState.chat.currentChat);
+            } else {
+                let editRequest = this.createRoomRequest(this.state.chatName.value);
+                this.props.editChat(editRequest, this.state.chatName.value, this.props.reducerState.chat.currentChat);
+            }
+            this.setState({
+                visibleEditModal: false,
+                roomUsers: []
+            });
+        }
+    }
+
     render() {
         const { Option } = Select;
         const children = [];
+        const childrenToEdit = [];
         const usersData = [];
         let users = [];
         if (this.props.reducerState.user.users) {
@@ -214,7 +239,8 @@ export class Home extends Component {
                         name: users[i].name,
                         email: users[i].email
                     })
-                    children.push(<Option key={users[i].id}>{users[i].email}</Option>)
+                    children.push(<Option key={users[i].id} >{users[i].email}</Option>)
+                    childrenToEdit.push(<Option key={users[i].email} >{users[i].email}</Option>)
                 }
             }
         }
@@ -338,7 +364,7 @@ export class Home extends Component {
                                                 mode="multiple"
                                                 style={{ width: '100%' }}
                                                 placeholder="Selecione por favor"
-                                                onChange={this.handleChange}
+                                                onChange={this.handleSelectChange}
                                             >
                                                 {children}
                                             </Select>
@@ -368,15 +394,15 @@ export class Home extends Component {
                         </Drawer>
                         <Modal
                             title="Edição de sala"
-                            visible={this.state.visibleEditModel}
-                            onOk={this.handleOk}
+                            visible={this.state.visibleEditModal}
+                            onOk={this.handleEdit}
                             onCancel={this.onClose}
                         >
                             <Form layout="vertical" hideRequiredMark>
                                 <Row gutter={16}>
                                     <Col span={24}>
                                         <Form.Item label="Nome da sala">
-                                            <Input placeholder="Nome do chat" value={this.props.reducerState.chat.currentChat}
+                                            <Input placeholder="Nome do chat" defaultValue={this.props.reducerState.chat.currentChatName}
                                                 onChange={(event) => this.handleInputChange(event)}
                                             />
                                         </Form.Item>
@@ -389,10 +415,10 @@ export class Home extends Component {
                                                 mode="multiple"
                                                 style={{ width: '100%' }}
                                                 placeholder="Selecione por favor"
-                                                value={this.props.reducerState.chat.roomUsersEmail}
-                                                onChange={this.handleChange}
+                                                defaultValue={this.props.reducerState.chat.roomUsersEmail}
+                                                onChange={this.handleSelectChange}
                                             >
-                                                {children}
+                                                {childrenToEdit}
                                             </Select>
                                         </Form.Item>
                                     </Col>
@@ -432,10 +458,11 @@ const mapDispatchToProps = (dispatch) => {
         getChats: (userId) => dispatch(getChats(userId)),
         getUsers: (page, size) => dispatch(getUsers(page, size)),
         setCurrentChat: (chatId, email) => dispatch(setCurrentChat(chatId, email)),
-        createChat: (createChatRequest) => dispatch(createChat(createChatRequest)),
+        createChat: (createChatRequest, email) => dispatch(createChat(createChatRequest, email)),
         deleteChat: (chatId) => dispatch(deleteChat(chatId)),
         getUsersByChat: (chatId, email) => dispatch(getUsersByChat(chatId, email)),
-        setRoomUsers: () => dispatch(setCurrentChat())
+        setRoomUsers: () => dispatch(setRoomUsers()),
+        editChat: (editChatRequest, email, chatId) => dispatch(editChat(editChatRequest, email, chatId))
     }
 }
 

@@ -38,6 +38,32 @@ export const getUsers = (name, lastName, page, size) => {
     }
 }
 
+export const getAllMessages = (emitter, receptor, page, size) => {
+    return dispatch => {
+        axios({
+            method: 'get',
+            url: "/api/v1/chats/messages?emitter="+emitter+"&receptor="+receptor+"&page=" + page + "&size=" + size,
+        }).then(response => {
+            dispatch({ type: 'GET_ALL_MESSAGES', response });
+        }).catch(error => {
+            dispatch({ type: 'GET_ALL_MESSAGES_ERROR', error });
+        });
+    }
+}
+
+export const getAllChats = (emitter, receptor, content, page, size) => {
+    return dispatch => {
+        axios({
+            method: 'get',
+            url: "/api/v1/chats?emitter=" + emitter + "&receptor=" + receptor + "&content=" + content + "&page=" + page + "&size=" + size,
+        }).then(response => {
+            dispatch({ type: 'GET_ALL_CHATS', response });
+        }).catch(error => {
+            dispatch({ type: 'GET_ALL_CHATS_ERROR', error });
+        });
+    }
+}
+
 export const deleteOneUser = (email, id) => {
     return dispatch => {
         axios({

@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import Home from '../src/components/home/Home';
 import UserList from '../src/components/userList/UserList';
 import Chat from '../src/components/chatMessage/ChatApp';
+import RoomList from '../src/components/roomList/RoomList'
 import Signup from '../src/components/signup/Signup';
 import Profile from '../src/components/profile/Profile';
 import Signin from './components/signin/Signin'
@@ -46,6 +47,7 @@ class App extends Component {
                 <Route path="/signup" component={Signup}></Route>
                 <Route path="/user/:email" component={Profile}></Route>
                 <Route path="/users" component={UserList}></Route>
+                <Route path="/rooms" component={RoomList}></Route>
                 <Route path="/chat" component={Chat}></Route>
                 <Route component={NotFound}></Route>
               </Switch>

@@ -59,7 +59,7 @@ export class Chat extends Component {
 
   receivesMessage(message) {
     let newMessage = {
-      key: Math.random(),
+      key: message.messsageId,
       fromName: message.fromName,
       fromUserId: message.fromUserId,
       content: message.content,
